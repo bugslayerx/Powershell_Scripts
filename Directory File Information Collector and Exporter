@@ -1,0 +1,32 @@
+# Set the source directory
+$sourceDirectory = "INSERT_DIRECTORY_TO_BE_SEARCHED_HERE"
+
+# Set the output file path
+$outputFile = "INSERT_PATH_TO_OUTPUT_FILE_HERE\output.txt"
+
+# Initialize an empty array to store the information
+$filesInfo = @()
+
+# Get all files in the source directory and its subdirectories
+$files = Get-ChildItem -Path $sourceDirectory -Recurse -File
+
+# Iterate through each file
+foreach ($file in $files) {
+    $md5Hash = (Get-FileHash -Path $file.FullName -Algorithm MD5).Hash
+    $info = [PSCustomObject]@{
+        FileName = $file.Name
+        FilePath = $file.FullName
+        MD5Hash  = $md5Hash
+        FileSize = $file.Length
+    }
+
+    $filesInfo += $info
+}
+
+# Format the information as a string
+$outputText = $filesInfo | Format-Table -AutoSize | Out-String
+
+# Save the information to the output file
+$outputText | Out-File -FilePath $outputFile
+
+Write-Host "Information has been saved to $outputFile"
